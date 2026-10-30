@@ -361,7 +361,8 @@ struct CardDetailView: View {
     }
 
     private func actionButton(_ card: Card) -> some View {
-        Group {
+        let state = joinButtonState(card)
+        return Group {
             if !loggedIn {
                 PrimaryButton(title: "登录后加入", action: onRequireLogin)
             } else if card.mine {
@@ -373,32 +374,24 @@ struct CardDetailView: View {
                     onOpenChat(card.interestConversationId, card.authorName, card.title, card.id)
                 }
             } else {
-                let label: String
-                let enabled: Bool
-                if card.interestStatus == 0 {
-                    label = "已发送，等待回应"
-                    enabled = false
-                } else if card.interestStatus == 2 {
-                    label = "对方已处理"
-                    enabled = false
-                } else if card.interestStatus == 4 {
-                    label = "意向已失效"
-                    enabled = false
-                } else if card.status != 1 {
-                    label = "已结束"
-                    enabled = false
-                } else if card.acceptedCount >= card.headcount {
-                    label = "已满员"
-                    enabled = false
-                } else {
-                    label = "我想加入"
-                    enabled = true
-                }
-                PrimaryButton(title: label, loading: vm.actionLoading, enabled: enabled) {
+                PrimaryButton(
+                    title: state.label,
+                    loading: vm.actionLoading,
+                    enabled: state.enabled
+                ) {
                     Task { await vm.join() }
                 }
             }
         }
+    }
+
+    private func joinButtonState(_ card: Card) -> (label: String, enabled: Bool) {
+        if card.interestStatus == 0 { return ("已发送，等待回应", false) }
+        if card.interestStatus == 2 { return ("对方已处理", false) }
+        if card.interestStatus == 4 { return ("意向已失效", false) }
+        if card.status != 1 { return ("已结束", false) }
+        if card.acceptedCount >= card.headcount { return ("已满员", false) }
+        return ("我想加入", true)
     }
 
     private func interestsSection(_ card: Card) -> some View {

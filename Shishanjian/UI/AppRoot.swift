@@ -208,7 +208,7 @@ struct AppRoot: View {
                 let cardTitle = (title?.isEmpty == false) ? title! : "你的需求"
                 AppNoticeCenter.shared.message(
                     title: "需求状态更新",
-                    message: "「(cardTitle)」(detail)"
+                    message: "「\(cardTitle)」\(detail)"
                 )
                 return
             }
